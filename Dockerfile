@@ -72,11 +72,12 @@ RUN wget "https://github.com/conda-forge/miniforge/releases/latest/download/Mini
     && bash ~/miniforge.sh -b -p $CONDA_DIR -u \
     && rm ~/miniforge.sh \
     && ln -s $CONDA_DIR/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
-    && ln -s $CONDA_DIR/etc/profile.d/mamba.sh /etc/profile.d/mamba.sh \
     && echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> /etc/bash.bashrc \
-    && echo ". $CONDA_DIR/etc/profile.d/mamba.sh" >> /etc/bash.bashrc \
     && echo "conda activate base" >> /etc/bash.bashrc \
     && chmod -R 777 $CONDA_DIR
+
+# Set MAMBA_ROOT_PREFIX environment variable
+ENV MAMBA_ROOT_PREFIX=$CONDA_DIR
 
 # Install pip in base environment and ensure permissions
 RUN mamba install -y pip \
@@ -84,7 +85,7 @@ RUN mamba install -y pip \
     && chmod -R 777 $CONDA_DIR/pkgs
 
 # Setup for new users
-RUN echo ". /etc/profile.d/mamba.sh" >> /etc/skel/.bashrc \
+RUN echo "export MAMBA_ROOT_PREFIX=$CONDA_DIR" >> /etc/skel/.bashrc \
     && echo "conda activate base" >> /etc/skel/.bashrc
 
 # Initialize conda for shell interaction
