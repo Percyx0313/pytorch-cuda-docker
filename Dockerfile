@@ -1,5 +1,7 @@
 # Start with NVIDIA CUDA 12.4 base image
 FROM nvidia/cuda:12.4.0-devel-ubuntu22.04
+#FROM pytorch/pytorch:2.4.1-cuda12.1-cudnn9-devel
+
 
 # Set environment variables
 ENV CONDA_DIR=/opt/conda
@@ -67,7 +69,7 @@ RUN sed -i 's/#X11Forwarding no/X11Forwarding yes/' /etc/ssh/sshd_config \
 
 # Install Mambaforge and set permissions
 RUN wget "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -O ~/miniforge.sh \
-    && bash ~/miniforge.sh -b -p $CONDA_DIR \
+    && bash ~/miniforge.sh -b -p $CONDA_DIR -u \
     && rm ~/miniforge.sh \
     && ln -s $CONDA_DIR/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
     && ln -s $CONDA_DIR/etc/profile.d/mamba.sh /etc/profile.d/mamba.sh \
@@ -82,13 +84,11 @@ RUN mamba install -y pip \
     && chmod -R 777 $CONDA_DIR/pkgs
 
 # Setup for new users
-RUN echo ". /etc/profile.d/conda.sh" >> /etc/skel/.bashrc \
-    && echo ". /etc/profile.d/mamba.sh" >> /etc/skel/.bashrc \
+RUN echo ". /etc/profile.d/mamba.sh" >> /etc/skel/.bashrc \
     && echo "conda activate base" >> /etc/skel/.bashrc
 
 # Initialize conda for shell interaction
-RUN conda init bash \
-    && mamba init bash
+RUN conda init bash
 
 
 # Add SSH restart to root's bashrc
